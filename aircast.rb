@@ -1,20 +1,34 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'bundler/setup'
-require 'sinatra'
-require 'airplay'
 
+
+def grab_screen
+  if RbConfig::CONFIG['host_os']= "mswin32"
+    image = ::MiniMagick::Image.read Win32::Screenshot::Take.of(:desktop).bitmap
+    image.format 'jpg'
+    image.to_blob
+  else
+    %x{"import -window root jpeg:-"}
+  end
+end
+if RbConfig::CONFIG['host_os']= "mswin32"
+  require 'win32/screenshot'
+else
+  require 'airplay'
+  Thread.new do
+    airplay = Airplay::Client.new()
+    ipaddr=Socket.ip_address_list.detect{|intf| intf.ipv4_private?}  
+    ip = ipaddr.ip_address || '127.0.0.1'
+    airplay.send_video("http://#{ip}:4567/out.jpeg")
+  end
+end
+
+#sinatra part
+require 'sinatra'
 set :server, :thin
 set :bind, '0.0.0.0'
 set :port, 4567
-
-
-Thread.new do
-  airplay = Airplay::Client.new()
-  ipaddr=Socket.ip_address_list.detect{|intf| intf.ipv4_private?}  
-  ip = ipaddr.ip_address || '127.0.0.1'
-  airplay.send_video("http://#{ip}:4567/out.jpeg")
-end
 
 get '/' do
   erb :index
@@ -32,7 +46,7 @@ get '/out.jpeg' do
 
   stream(:keep_open) do |out|
     while true
-      content     = %x{import -window root jpeg:-}
+      content     = grab_screen()
       out << "Content-type: image/jpeg\n\n"
       out << content
       out << "\n\n--#{boundary}\n\n"
