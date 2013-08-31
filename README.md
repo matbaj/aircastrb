@@ -1,11 +1,20 @@
 aircastrb 
 ====================
 
+How to install
+--------------
+
+```
+$ bundle install
+```
 
 How to run it?
 --------------
- $ bundle install
+```
  $ ./aircast.rb
+```
+
+
 
 
 
