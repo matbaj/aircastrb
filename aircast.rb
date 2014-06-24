@@ -2,6 +2,7 @@
 require 'rubygems'
 require 'bundler/setup'
 require './streamers/airplay'
+require 'pry'
 
 
 if RbConfig::CONFIG['host_os']== "mswin32"
@@ -29,9 +30,9 @@ class Server < Sinatra::Base
     erb :'index.html'
   end
 
-  get '/out.jpeg' do
-
-    fps = 5
+  get '/out.jpg' do
+    #binding.pry
+    fps = 60
     boundary = 'image_end'
 
     headers \
@@ -49,19 +50,21 @@ class Server < Sinatra::Base
         end
       end
       while true
-        t = Time.now
+        #t = Time.now
         fps_meter += 1
         content     = $grab_screen.grab
+        #gt = Time.now - t
+        #puts "screenshot #{gt}"
+        #puts "#{fps}"
         out << "Content-type: image/jpeg\n\n"
         out << content
         out << "\n\n--#{boundary}\n\n"
-        delay = ((1.0/fps)-(Time.now - t))
-        sleep delay if delay > 0
+        #puts "sent #{Time.now - t}"
+        #delay = ((1.0/fps)-(Time.now - t))
+        #sleep delay if delay > 0
       end
     end
   end
 end
 Server.run!
-
-
 

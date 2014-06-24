@@ -1,16 +1,16 @@
-CFLAGS = -g -Wall -fPIC -lX11 -ljpeg -O2
+CFLAGS = -g -Wall -fPIC -lX11 -lXext -lturbojpeg -O2
 CC = g++
 
 all: libscreenshot_linux 
 
 libscreenshot_linux:  screenshot_linux.o
-	${CC} ${CFLAGS} -shared -o $@.so screenshot_linux.o 
+	${CC}  -shared -o $@.so screenshot_linux.o ${CFLAGS}
 
 .cpp.o:
-	${CC} ${CFLAGS} -c $<
+	${CC}  -c $< ${CFLAGS}
  
 .c.o:
-	${CC} ${CFLAGS} -c $< 
+	${CC} -c $<  ${CFLAGS}
 
 clean:
 	rm *.o libscreenshot_linux.so
